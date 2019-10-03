@@ -1,4 +1,5 @@
-Machine Level OpCode : Description : Assembly OpCode : Parameter Details
+## it is a single line comment
+## Machine Level OpCode : Description : Assembly OpCode : Parameter Details
 0000 : Clear Accumulator : CLA : none
 0001 : Load into Accumulator from address : LAC : address
 0010 : Store accumulator contents into address : SAC : address
@@ -12,4 +13,5 @@ Machine Level OpCode : Description : Assembly OpCode : Parameter Details
 1010 : Multiply accumulator and address contents : MUL : address
 1011 : Divide accumulator contents by address content. Quotient in R1 and remainder in R2 : DIV : address
 1100 : Stop execution : STP : none
-1233 : Not a binary number : NAB : nine
+##1001 : sadfadfadfasdfadf : SAR : 
+##1021 : esse : EDA : none

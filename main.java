@@ -16,7 +16,9 @@ class assembler {
 		if(!errorFound)
 			errorFound = loadSourceCode(new Scanner(System.in).nextLine()) ;
 		if(!errorFound)
-			passOne() ;
+			errorFound = passOne() ;
+		if(!errorFound)
+			passTwo() ;
 	}
 	private boolean loadOpCodeTable()	{
 		/* This is a fuction to read the file OpCodes.data because this file contains the all opcode details.
@@ -36,14 +38,14 @@ class assembler {
 			return false ; 	// error not found
 		}
 		catch(FileNotFoundException NoFileExc) {
-			System.out.println("The Opcode File is not present\nAssembler has been damaged");
+			System.out.println("\nThe Opcode File is not present\nAssembler has been damaged");
 		}
 		catch(NumberFormatException String2IntExc) {
-			System.out.println("Can't extract Binary OpCode(Machine language opcode)\nAssembler has been damaged");
+			System.out.println("\nCan't extract Binary OpCode(Machine language opcode)\nAssembler has been damaged");
 			System.out.println("Error in OpCodes.data at line number : "+lineNum);System.out.println(line);
 		}
 		catch(OpCodeFileFormatException FileNotFormated) {
-			System.out.println("The opcode file is not formated as documented in the file");
+			System.out.println("\nThe opcode file is not formated as documented in the file\n"+FileNotFormated);
 			System.out.println("Error in OpCodes.data at line number : "+lineNum);System.out.println(line);
 		}
 		// IDEA: try to do something such that, all the errors are shown in same time
@@ -90,23 +92,72 @@ class assembler {
 		}
 		return false ;
 	}
-	private void passOne() {
+	private void checkOpCode(List<String> instruction) throws OpCodeNotValidException {
+		if(!OpCode_Table.containsKey(instruction.get(0)))	throw new OpCodeNotValidException(instruction.get(0)+" is not a valid OpCode.") ;
+		else if(OpCode_Table.get(instruction.get(0)).parameterInfo.equals("none") && instruction.size()!=1)	throw new OpCodeNotValidException(instruction.get(0)+" needs no parameter.") ;
+		else if(OpCode_Table.get(instruction.get(0)).parameterInfo.equals("address")) {
+			if(instruction.size()!=2)	throw new OpCodeNotValidException(instruction.get(0)+"needs a address as parameter.") ;
+			if(!new MemoryManager().isValidAddress(instruction.get(1)))	throw new OpCodeNotValidException(instruction.get(1)+" is not a valid address.") ;
+		}
+		else if(OpCode_Table.get(instruction.get(0)).parameterInfo.equals("label") && instruction.size()!=2) {
+			if(instruction.size()!=2)	throw new OpCodeNotValidException(instruction.get(0)+"needs a address as parameter.") ;
+		}
+		// TODO: Check for label's parameter check
+	}
+	private boolean passOne() {
 		System.out.println("Entering passOne");
+		boolean errorFound = false ;
+		String scope = "" ;
 		// TODO: create symbol table , litral table , instruction table ( Pool table )
 		try {
 			Scanner file = new Scanner(SourceCode) ;
 			SymbolTable = new ArrayList<SymbolTableNode>() ;
+			FileTextManipulation help = new FileTextManipulation() ;
 			int lineNum = 0 ; String Line = "" ;
 			while(file.hasNextLine())	{
-				Line = new FileTextManipulation().removeComments(file.nextLine()) ;
-				
+				Line = help.removeComments(file.nextLine()) ;	lineNum++ ;
+				List<String> inst_List = help.standardSplit(Line) ;	// line to split the instruction in liist of string
+				try {
+						if(inst_List.size() > 0 && inst_List.get(0).equals("MEND") && scope.length() > 5 && scope.substring(scope.length()-6).equals("$Macro"))
+						{ // block to handle MEND
+							scope = scope.substring(0,scope.length()-6) ;	// moving it out of MACROs scope
+						}
+						//  FIXME: handle STP in pass one
+						else if(inst_List.size() > 0 && OpCode_Table.containsKey(inst_List.get(0)))
+						{
+							checkOpCode(inst_List) ;
+						}
+						else if(inst_List.size() > 1 && inst_List.get(1).equals(":"))
+						{// block for handling label defination
+							checkOpCode(inst_List.subList(2,inst_List.size())) ;
+							SymbolTable.add(new SymbolTableNode(inst_List.get(0),scope+"$Label",lineNum)) ;	// added the symbol(label) in symbol table.
+						}
+						else if(inst_List.size() > 1 && inst_List.get(1).equals("MACRO"))
+						{
+							scope += "$Macro" ;
+							SymbolTable.add(new SymbolTableNode(inst_List.get(0),scope,lineNum)) ;
+						}
+				}
+				catch (OpCodeNotValidException OpCodeExp) {
+					System.out.println("\n"+OpCodeExp+"\nError at line number : "+lineNum);System.out.println(Line);
+					errorFound = true ;
+				}
+				catch (SymbolNodeFormatException SymbolExp) {
+					System.out.println("\n"+SymbolExp+"\nError at line number : "+lineNum);System.out.println(Line);
+					errorFound = true ;
+				}
 			}
+			if(scope.length() != 0)	throw new ScopeNotResolvedException("MACRO") ;
 		}
-		catch(FileNotFoundException e) {
-			System.out.println("File doesn't exist");
-			return ;
+		catch(FileNotFoundException FileExp) {
+			System.out.println("\nFile doesn't exist");
+			return true ;
 		}
-		passTwo() ;
+		catch (ScopeNotResolvedException ScopeExp) {
+			System.out.println(ScopeExp+" is not ending using MEND programs scope are weird");
+			return true ;
+		}
+		return errorFound ;
 	}
 	private void passTwo() {
 		System.out.println("Entering passTwo");

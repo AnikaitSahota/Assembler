@@ -13,5 +13,3 @@
 1010 : Multiply accumulator and address contents : MUL : address
 1011 : Divide accumulator contents by address content. Quotient in R1 and remainder in R2 : DIV : address
 1100 : Stop execution : STP : none
-##1001 : sadfadfadfasdfadf : SAR : 
-##1021 : esse : EDA : none

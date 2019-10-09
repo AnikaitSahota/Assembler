@@ -1,6 +1,10 @@
 package assemblerExceptions ;
 public class OpCodeFileFormatException extends Exception {
+    private String message ;
     public OpCodeFileFormatException(String message) {
-        System.out.println(message+" is missing in OpCodes.data file");
+        this.message = message ;
+    }
+    public String toString() {
+        return (message+" is missing in OpCodes.data file");
     }
 }

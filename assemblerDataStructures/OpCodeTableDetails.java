@@ -4,9 +4,8 @@ public class OpCodeTableDetails {
         MachineOpcode is a int data member to store the binary opcode value corresponding to assembly level opcode.
         Description and parameterInfo is just a data member to store documentation of opcode for future need.
         parameterInfo contains the details of the parameters corresponding to OpCode.	*/
-    public final int MachineOpcode ;
-    public final String Description , parameterInfo ;
-    public OpCodeTableDetails(int BinaryCode , String Details , String parameterInfo)
+    public final String Description , parameterInfo , MachineOpcode ;
+    public OpCodeTableDetails(String BinaryCode , String Details , String parameterInfo)
     {	// parameterized constructor
         MachineOpcode = BinaryCode ;
         Description = Details ;

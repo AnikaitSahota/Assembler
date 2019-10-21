@@ -1,8 +1,8 @@
 package assemblerTools ;
 import java.util.* ;
 public class FileTextManipulation {
-    public String removeComments(String inputStr) {	// a function to seprate the code and comment for furthur processing
-        int index = inputStr.indexOf("##") ;
+    private String removeComments(String inputStr , String cmtStr) {	// a function to seprate the code and comment for furthur processing
+        int index = inputStr.indexOf(cmtStr) ;
         if(index == -1) return inputStr.trim() ;
         return inputStr.substring(0,index).trim() ;
     }
@@ -15,5 +15,14 @@ public class FileTextManipulation {
             else str += message.charAt(i) ;
         }
         return Arrays.asList(str.split(" ")) ;
+    }
+    public String removeOpCodeFileComments(String inputStr) {
+        return removeComments(inputStr,"##") ;
+    }
+    public String removeSourceFileComments(String inputStr) {
+        return removeComments(inputStr,";") ;
+    }
+    public String dec2bin(int adr ) {
+        return Integer.toBinaryString(adr) ;
     }
 }
